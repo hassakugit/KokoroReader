@@ -101,6 +101,11 @@
                 </button>
             </form>
 
+            <!-- Error Message Display -->
+            <div x-show="errorMessage" x-cloak class="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                <p><strong>Error:</strong> <span x-text="errorMessage"></span></p>
+            </div>
+
             <!-- Current Player -->
             <div x-show="currentAudioUrl" x-transition class="mt-6 p-4 border-t dark:border-gray-700">
                 <h3 class="text-lg font-semibold mb-2">Now Playing</h3>
@@ -155,6 +160,7 @@
                 fileName: '',
                 loading: false,
                 currentAudioUrl: null,
+                errorMessage: null,
                 history: {{ history | tojson }},
                 isDark: false,
 
@@ -180,6 +186,7 @@
                     if (!this.textInput && !this.file) return;
                     
                     this.loading = true;
+                    this.errorMessage = null;
                     this.currentAudioUrl = null;
 
                     const formData = new FormData();
@@ -188,23 +195,29 @@
                     if (this.file) formData.append('file_upload', this.file);
 
                     try {
+                        // Using relative path to ensure we hit the correct container port
                         const response = await fetch('/generate', {
                             method: 'POST',
                             body: formData
                         });
+                        
+                        // Handle server errors (500/400)
+                        if (!response.ok) {
+                            const errData = await response.json();
+                            throw new Error(errData.error || 'Server Error');
+                        }
+
                         const data = await response.json();
                         
                         if (data.success) {
                             this.currentAudioUrl = data.audio_url;
                             this.history = data.history;
-                            // Clear file input after success
                             this.file = null;
                             this.fileName = '';
-                        } else {
-                            alert('Error: ' + data.error);
                         }
                     } catch (e) {
-                        alert('Network Error');
+                        console.error(e);
+                        this.errorMessage = e.message || 'Network Error';
                     } finally {
                         this.loading = false;
                     }
@@ -212,7 +225,6 @@
 
                 playHistory(filename) {
                     this.currentAudioUrl = '/static/audio/' + filename;
-                    // Auto scroll to player
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }

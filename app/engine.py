@@ -8,11 +8,10 @@ import io
 import re
 import sys
 
-# Global pipeline variable
 PIPELINE = None
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-# Map of friendly names to voice codes
+# Friendly names to voice codes
 VOICES = {
     "Bella (American)": "af_bella",
     "Sarah (American)": "af_sarah",
@@ -27,25 +26,29 @@ VOICES = {
 }
 
 def initialize_model():
-    """
-    Initializes the Kokoro pipeline. 
-    This triggers the download of the model weights (~300MB) if not cached.
-    """
+    """Initializes the Kokoro pipeline and runs a full end-to-end test."""
     global PIPELINE
     print(f"--> Initializing Kokoro Pipeline on device: {device}...")
     try:
-        # Initialize pipeline (downloads weights if needed)
         PIPELINE = KPipeline(lang_code='a', device=device)
         
-        # Warmup: Run a tiny generation to ensure espeak and model are loaded
+        # Warmup: Run a generation AND an export to test libraries
         print("--> Running warmup generation...")
-        dummy_gen = PIPELINE("Hello", voice="af_bella", speed=1)
-        for _ in dummy_gen: 
-            pass
+        generator = PIPELINE("Startup test", voice="af_bella", speed=1)
+        all_audio = []
+        for _, _, audio in generator: 
+            all_audio.append(audio)
+            
+        if all_audio:
+            # Test numpy concatenation and Soundfile writing
+            final_audio_np = np.concatenate(all_audio)
+            buffer = io.BytesIO()
+            sf.write(buffer, final_audio_np, 24000, format='WAV')
+            print("--> Audio encoding test passed.")
+            
         print("--> Model ready.")
     except Exception as e:
         print(f"!!! CRITICAL ERROR initializing model: {e}")
-        # We re-raise so the container fails fast if the model is broken
         raise e
 
 def get_voice_list():
@@ -59,9 +62,7 @@ def generate_audio_segment(text, voice_key):
     if not text.strip():
         return None
     
-    # Generate audio
     generator = PIPELINE(text, voice=voice_key, speed=1, split_pattern=r'\n+')
-    
     all_audio = []
     for _, _, audio in generator:
         all_audio.append(audio)
@@ -70,8 +71,6 @@ def generate_audio_segment(text, voice_key):
         return None
 
     final_audio_np = np.concatenate(all_audio)
-    
-    # Convert to WAV in memory
     buffer = io.BytesIO()
     sf.write(buffer, final_audio_np, 24000, format='WAV')
     buffer.seek(0)
@@ -81,15 +80,13 @@ def generate_audio_segment(text, voice_key):
 def process_text_with_markup(full_text, default_voice):
     lines = full_text.split('\n')
     combined_audio = AudioSegment.empty()
-    
     markup_pattern = re.compile(r'^\[voice:([a-zA-Z0-9_]+)\]\s*(.*)')
     current_voice = default_voice
     valid_ids = list(VOICES.values())
 
     for line in lines:
         line = line.strip()
-        if not line:
-            continue
+        if not line: continue
 
         match = markup_pattern.match(line)
         text_to_render = line
