@@ -20,21 +20,14 @@ def save_history(history):
 
 def add_entry(filename, text_snippet, voice):
     history = load_history()
-    
     entry = {
         "filename": filename,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "snippet": text_snippet[:50] + "..." if len(text_snippet) > 50 else text_snippet,
         "voice": voice
     }
-    
-    # Prepend new entry
     history.insert(0, entry)
-    
-    # Keep only last 25
     if len(history) > MAX_HISTORY:
-        # We could also delete the old file here to save space
         history = history[:MAX_HISTORY]
-        
     save_history(history)
     return history

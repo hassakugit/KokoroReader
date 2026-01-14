@@ -3,173 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kokoro TTS Local</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Kokoro Web Client</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tailwind Config for Dark Mode -->
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
-    
-    <!-- Alpine JS -->
+    <script> tailwind.config = { darkMode: 'class' } </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <style>
-        [x-cloak] { display: none !important; }
-        /* Custom scrollbar for text area */
-        textarea::-webkit-scrollbar {
-            width: 8px;
-        }
-        textarea::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 4px;
-        }
-        .dark textarea::-webkit-scrollbar-thumb {
-            background-color: #475569;
-        }
-    </style>
+    <style> [x-cloak] { display: none !important; } </style>
 </head>
-<body class="bg-gray-100 text-gray-800 transition-colors duration-300 dark:bg-gray-900 dark:text-gray-200 min-h-screen">
+<body class="bg-gray-100 text-gray-800 transition-colors duration-300 dark:bg-gray-900 dark:text-gray-200 min-h-screen relative">
 
     <!-- Header -->
     <header class="bg-white dark:bg-gray-800 shadow-md p-4">
         <div class="max-w-5xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">
-                Kokoro TTS <span class="text-xs font-normal text-gray-500 dark:text-gray-400">Docker Edition</span>
+            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-600">
+                Kokoro <span class="text-gray-500 font-light">Web Interface</span>
             </h1>
             
-            <!-- Dark Mode Toggle -->
-            <button @click="toggleTheme()" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
-                <span x-show="!isDark">🌞 Light</span>
-                <span x-show="isDark" x-cloak>🌙 Dark</span>
-            </button>
+            <div class="flex items-center space-x-4">
+                <!-- Theme Toggle -->
+                <button @click="toggleTheme()" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <span x-show="!isDark">🌞</span><span x-show="isDark" x-cloak>🌙</span>
+                </button>
+                
+                <!-- Settings Icon -->
+                <button @click="showSettings = true" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-xl">
+                    ⚙️
+                </button>
+            </div>
         </div>
     </header>
 
     <main class="max-w-5xl mx-auto p-4 space-y-8">
-        
-        <!-- Controls & Input -->
+        <!-- Main Form -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-            
             <form @submit.prevent="generateAudio">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                    
-                    <!-- Voice Selection -->
                     <div>
-                        <label class="block text-sm font-medium mb-2">Select Default Voice</label>
-                        <select x-model="selectedVoice" class="w-full p-2 rounded border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label class="block text-sm font-medium mb-2">Voice</label>
+                        <select x-model="selectedVoice" class="w-full p-2 rounded border dark:bg-gray-700 dark:border-gray-600">
                             {% for name, code in voices.items() %}
-                            <option value="{{ name }}">{{ name }} ({{code}})</option>
+                            <option value="{{ name }}">{{ name }}</option>
                             {% endfor %}
                         </select>
-                        <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Codes: {% for name, code in voices.items() %} <span class="font-mono bg-gray-200 dark:bg-gray-700 px-1 rounded">{{code}}</span> {% endfor %}
-                        </div>
                     </div>
-
-                    <!-- File Upload -->
                     <div>
-                        <label class="block text-sm font-medium mb-2">Upload File (PDF/TXT)</label>
-                        <input type="file" @change="handleFileUpload" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-blue-400">
-                        <p x-show="fileName" class="text-xs mt-1 text-green-600" x-text="'Selected: ' + fileName"></p>
+                        <label class="block text-sm font-medium mb-2">Upload File</label>
+                        <input type="file" @change="file = $event.target.files[0]" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-blue-400">
                     </div>
                 </div>
 
-                <!-- Text Area -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Input Text</label>
-                    <textarea x-model="textInput" rows="6" class="w-full p-3 rounded border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none resize-y" placeholder="Enter text here or use markup like [voice:af_bella] Hello world..."></textarea>
+                    <textarea x-model="textInput" rows="5" class="w-full p-3 rounded border dark:bg-gray-700 dark:border-gray-600" placeholder="Type here or use [voice:af_bella]..."></textarea>
                 </div>
 
-                <!-- Markup Help -->
-                <div class="mb-6 p-3 bg-blue-50 dark:bg-gray-700/50 rounded text-sm border-l-4 border-blue-500">
-                    <strong>Markup Rules:</strong> To switch voices mid-text, start a new paragraph (newline) with <code class="bg-gray-200 dark:bg-gray-600 px-1 rounded">[voice:code]</code>.
-                    <br><em>Example:</em><br>
-                    <span class="font-mono text-xs">
-                        [voice:am_adam] This is Adam speaking.<br>
-                        [voice:af_sarah] And this is Sarah responding.
-                    </span>
-                </div>
-
-                <!-- Action Button -->
-                <button type="submit" :disabled="loading" class="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg shadow hover:opacity-90 disabled:opacity-50 transition transform active:scale-95 flex justify-center items-center">
-                    <span x-show="loading" class="animate-spin mr-2">⚙️</span>
-                    <span x-text="loading ? 'Rendering Audio...' : 'Generate Speech'"></span>
+                <button type="submit" :disabled="loading" class="w-full py-3 bg-blue-600 text-white font-bold rounded hover:bg-blue-700 disabled:opacity-50 flex justify-center">
+                    <span x-show="loading" class="animate-spin mr-2">⏳</span>
+                    <span x-text="loading ? 'Processing...' : 'Generate'"></span>
                 </button>
             </form>
 
-            <!-- Error Message Display -->
-            <div x-show="errorMessage" x-cloak class="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-                <p><strong>Error:</strong> <span x-text="errorMessage"></span></p>
+            <!-- Error -->
+            <div x-show="errorMsg" x-cloak class="mt-4 p-3 bg-red-100 text-red-700 rounded border border-red-300">
+                <span x-text="errorMsg"></span>
             </div>
 
-            <!-- Current Player -->
-            <div x-show="currentAudioUrl" x-transition class="mt-6 p-4 border-t dark:border-gray-700">
-                <h3 class="text-lg font-semibold mb-2">Now Playing</h3>
-                <audio :src="currentAudioUrl" controls autoplay class="w-full"></audio>
-                <div class="mt-2 text-right">
-                    <a :href="currentAudioUrl" download class="text-sm text-blue-500 hover:underline">Download WAV</a>
-                </div>
+            <!-- Player -->
+            <div x-show="audioUrl" x-transition class="mt-6 p-4 border-t dark:border-gray-700">
+                <h3 class="font-bold mb-2">Result</h3>
+                <audio :src="audioUrl" controls autoplay class="w-full"></audio>
+                <div class="mt-2 text-right"><a :href="audioUrl" download class="text-blue-500 text-sm">Download WAV</a></div>
             </div>
         </div>
 
         <!-- History -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4">Generation History (Last 25)</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b dark:border-gray-700 text-sm text-gray-500">
-                            <th class="py-2">Time</th>
-                            <th class="py-2">Voice</th>
-                            <th class="py-2">Snippet</th>
-                            <th class="py-2 text-right">Actions</th>
+            <h2 class="text-xl font-bold mb-4">History</h2>
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr class="border-b dark:border-gray-700 opacity-70">
+                        <th class="py-2">Time</th><th class="py-2">Snippet</th><th class="py-2 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="item in history" :key="item.filename">
+                        <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <td class="py-2" x-text="item.timestamp"></td>
+                            <td class="py-2 opacity-80" x-text="item.snippet"></td>
+                            <td class="py-2 text-right">
+                                <button @click="audioUrl = '/static/audio/' + item.filename" class="text-blue-500 mr-2">Play</button>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <template x-for="item in history" :key="item.filename">
-                            <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                                <td class="py-3 text-xs whitespace-nowrap" x-text="item.timestamp"></td>
-                                <td class="py-3 text-xs font-semibold" x-text="item.voice"></td>
-                                <td class="py-3 text-sm text-gray-600 dark:text-gray-400" x-text="item.snippet"></td>
-                                <td class="py-3 text-right space-x-2">
-                                    <button @click="playHistory(item.filename)" class="text-blue-500 hover:text-blue-700">Play</button>
-                                    <a :href="'/static/audio/' + item.filename" download class="text-green-500 hover:text-green-700">DL</a>
-                                </td>
-                            </tr>
-                        </template>
-                        <tr x-show="history.length === 0">
-                            <td colspan="4" class="py-4 text-center text-gray-500">No history yet.</td>
-                        </tr>
-                    </tbody>
-                </table>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div x-show="showSettings" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-96">
+            <h2 class="text-xl font-bold mb-4">Settings</h2>
+            
+            <label class="block text-sm font-medium mb-1">Kokoro API URL</label>
+            <input type="text" x-model="apiUrl" class="w-full p-2 mb-1 border rounded dark:bg-gray-700 dark:border-gray-600" placeholder="http://192.168.1.10:50050">
+            <p class="text-xs text-gray-500 mb-4">Example: http://host.docker.internal:50050</p>
+            
+            <div class="flex justify-end space-x-2">
+                <button @click="showSettings = false" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded">Cancel</button>
+                <button @click="saveSettings" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
             </div>
         </div>
-
-    </main>
+    </div>
 
     <script>
         function appData() {
             return {
-                textInput: 'Hello! This is Kokoro running on your Mac Mini. Try typing something or upload a PDF.',
+                textInput: '',
                 selectedVoice: 'Bella (American)',
                 file: null,
-                fileName: '',
                 loading: false,
-                currentAudioUrl: null,
-                errorMessage: null,
+                audioUrl: null,
+                errorMsg: null,
                 history: {{ history | tojson }},
                 isDark: false,
-
+                showSettings: false,
+                apiUrl: '', // Bound to input
+                
                 init() {
-                    // Check local storage or system preference for theme
-                    if (localStorage.getItem('theme') === 'dark' || 
-                       (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    // Theme Load
+                    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                         this.isDark = true;
                     }
+                    // API URL Load (Default if empty)
+                    this.apiUrl = localStorage.getItem('kokoro_api_url') || 'http://host.docker.internal:50050';
                 },
 
                 toggleTheme() {
@@ -177,55 +143,45 @@
                     localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
                 },
 
-                handleFileUpload(event) {
-                    this.file = event.target.files[0];
-                    if (this.file) this.fileName = this.file.name;
+                saveSettings() {
+                    // Remove trailing slash if present
+                    let url = this.apiUrl.replace(/\/+$/, "");
+                    localStorage.setItem('kokoro_api_url', url);
+                    this.showSettings = false;
                 },
 
                 async generateAudio() {
                     if (!this.textInput && !this.file) return;
                     
                     this.loading = true;
-                    this.errorMessage = null;
-                    this.currentAudioUrl = null;
+                    this.errorMsg = null;
+                    this.audioUrl = null;
+
+                    // Get latest URL from storage
+                    const currentApiUrl = localStorage.getItem('kokoro_api_url') || this.apiUrl;
 
                     const formData = new FormData();
                     formData.append('voice_select', this.selectedVoice);
+                    formData.append('api_url', currentApiUrl);
                     if (this.textInput) formData.append('text_input', this.textInput);
                     if (this.file) formData.append('file_upload', this.file);
 
                     try {
-                        // Using relative path to ensure we hit the correct container port
-                        const response = await fetch('/generate', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        
-                        // Handle server errors (500/400)
-                        if (!response.ok) {
-                            const errData = await response.json();
-                            throw new Error(errData.error || 'Server Error');
-                        }
-
-                        const data = await response.json();
+                        const res = await fetch('/generate', { method: 'POST', body: formData });
+                        const data = await res.json();
                         
                         if (data.success) {
-                            this.currentAudioUrl = data.audio_url;
+                            this.audioUrl = data.audio_url;
                             this.history = data.history;
                             this.file = null;
-                            this.fileName = '';
+                        } else {
+                            this.errorMsg = data.error || 'Server Error';
                         }
                     } catch (e) {
-                        console.error(e);
-                        this.errorMessage = e.message || 'Network Error';
+                        this.errorMsg = 'Failed to connect to Web Interface Server';
                     } finally {
                         this.loading = false;
                     }
-                },
-
-                playHistory(filename) {
-                    this.currentAudioUrl = '/static/audio/' + filename;
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }
         }
