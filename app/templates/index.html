@@ -7,110 +7,184 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script> tailwind.config = { darkMode: 'class' } </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style> [x-cloak] { display: none !important; } </style>
+    <style> 
+        [x-cloak] { display: none !important; } 
+        select { -webkit-appearance: none; } /* Better looking selects */
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-800 transition-colors duration-300 dark:bg-gray-900 dark:text-gray-200 min-h-screen relative">
+<body class="bg-gray-100 text-gray-800 transition-colors duration-300 dark:bg-gray-900 dark:text-gray-200 min-h-screen">
 
     <!-- Header -->
-    <header class="bg-white dark:bg-gray-800 shadow-md p-4">
-        <div class="max-w-5xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-600">
-                Kokoro <span class="text-gray-500 font-light">Web Interface</span>
+    <header class="bg-white dark:bg-gray-800 shadow-md p-4 sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
+                Kokoro <span class="text-gray-500 font-light text-lg">Studio</span>
             </h1>
-            
-            <div class="flex items-center space-x-4">
-                <!-- Theme Toggle -->
-                <button @click="toggleTheme()" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+            <div class="flex items-center space-x-3">
+                <button @click="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
                     <span x-show="!isDark">🌞</span><span x-show="isDark" x-cloak>🌙</span>
                 </button>
-                
-                <!-- Settings Icon -->
-                <button @click="showSettings = true" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-xl">
+                <button @click="showSettings = true" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
                     ⚙️
                 </button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-5xl mx-auto p-4 space-y-8">
-        <!-- Main Form -->
+    <main class="max-w-6xl mx-auto p-4 space-y-6">
+        
+        <!-- MAIN INTERFACE -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
             <form @submit.prevent="generateAudio">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Voice</label>
-                        <select x-model="selectedVoice" class="w-full p-2 rounded border dark:bg-gray-700 dark:border-gray-600">
-                            {% for name, code in voices.items() %}
-                            <option value="{{ name }}">{{ name }}</option>
-                            {% endfor %}
-                        </select>
+                
+                <!-- TOP CONTROLS GRID -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg border dark:border-gray-700">
+                    
+                    <!-- Primary Voice (Span 5) -->
+                    <div class="md:col-span-5">
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Primary Voice</label>
+                        <div class="relative">
+                            <select x-model="selectedVoice" class="w-full p-2.5 pl-3 pr-8 rounded border bg-white dark:bg-gray-700 dark:border-gray-600 focus:ring-2 ring-indigo-500 outline-none text-sm">
+                                {% for v in voices %}
+                                <option value="{{ v.id }}">{{ v.label }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">▼</div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Upload File</label>
-                        <input type="file" @change="file = $event.target.files[0]" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-blue-400">
+
+                    <!-- Mixing Voice (Span 4) -->
+                    <div class="md:col-span-4">
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Mix With (Optional)</label>
+                        <div class="relative">
+                            <select x-model="mixVoice" class="w-full p-2.5 pl-3 pr-8 rounded border bg-white dark:bg-gray-700 dark:border-gray-600 focus:ring-2 ring-indigo-500 outline-none text-sm">
+                                <option value="none">-- No Mixing --</option>
+                                {% for v in voices %}
+                                <option value="{{ v.id }}">{{ v.label }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">▼</div>
+                        </div>
+                    </div>
+
+                    <!-- Speed (Span 3) -->
+                    <div class="md:col-span-3">
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Speed: <span x-text="speed + 'x'"></span></label>
+                        <input type="range" min="0.5" max="2.0" step="0.1" x-model="speed" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 accent-indigo-500 mt-2">
                     </div>
                 </div>
 
+                <!-- FILE & TEXT INPUT -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium mb-2">Input Text</label>
-                    <textarea x-model="textInput" rows="5" class="w-full p-3 rounded border dark:bg-gray-700 dark:border-gray-600" placeholder="Type here or use [voice:af_bella]..."></textarea>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-sm font-medium">Input Text / Script</label>
+                        <label class="cursor-pointer text-xs bg-indigo-50 text-indigo-600 px-3 py-1 rounded hover:bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-200 transition">
+                            📂 Upload PDF/TXT
+                            <input type="file" @change="handleFile" class="hidden">
+                        </label>
+                    </div>
+                    
+                    <div x-show="fileName" class="mb-2 p-2 bg-green-50 text-green-700 text-sm rounded flex justify-between items-center border border-green-200">
+                        <span>📄 <span x-text="fileName"></span></span>
+                        <button type="button" @click="clearFile" class="text-red-500 hover:text-red-700">✕</button>
+                    </div>
+
+                    <textarea x-model="textInput" rows="8" class="w-full p-4 font-mono text-sm rounded border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner" placeholder="Enter text here..."></textarea>
                 </div>
 
-                <button type="submit" :disabled="loading" class="w-full py-3 bg-blue-600 text-white font-bold rounded hover:bg-blue-700 disabled:opacity-50 flex justify-center">
-                    <span x-show="loading" class="animate-spin mr-2">⏳</span>
-                    <span x-text="loading ? 'Processing...' : 'Generate'"></span>
+                <!-- GENERATE BUTTON -->
+                <button type="submit" :disabled="loading" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-lg shadow-md hover:shadow-lg hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-[0.99] flex justify-center items-center text-lg">
+                    <span x-show="loading" class="animate-spin mr-3 text-2xl">⟳</span>
+                    <span x-text="loading ? 'Rendering Audio...' : 'Generate Speech'"></span>
                 </button>
             </form>
 
-            <!-- Error -->
-            <div x-show="errorMsg" x-cloak class="mt-4 p-3 bg-red-100 text-red-700 rounded border border-red-300">
-                <span x-text="errorMsg"></span>
+            <!-- ERROR MSG -->
+            <div x-show="errorMsg" x-cloak class="mt-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
+                <p class="font-bold">Error</p>
+                <p x-text="errorMsg"></p>
             </div>
 
-            <!-- Player -->
-            <div x-show="audioUrl" x-transition class="mt-6 p-4 border-t dark:border-gray-700">
-                <h3 class="font-bold mb-2">Result</h3>
-                <audio :src="audioUrl" controls autoplay class="w-full"></audio>
-                <div class="mt-2 text-right"><a :href="audioUrl" download class="text-blue-500 text-sm">Download WAV</a></div>
+            <!-- AUDIO PLAYER -->
+            <div x-show="audioUrl" x-transition class="mt-8 p-6 bg-indigo-50 dark:bg-gray-700/50 rounded-xl border border-indigo-100 dark:border-gray-600">
+                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                    🎵 Result 
+                    <a :href="audioUrl" download class="ml-auto text-sm bg-white dark:bg-gray-600 px-3 py-1 rounded shadow hover:bg-gray-50 dark:hover:bg-gray-500 transition">Download WAV</a>
+                </h3>
+                <audio :src="audioUrl" controls autoplay class="w-full h-10"></audio>
+            </div>
+        </div>
+        
+        <!-- MARKUP LEGEND -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border-l-4 border-blue-400">
+            <h3 class="text-lg font-bold mb-3 text-gray-700 dark:text-gray-200">Markup Cheat Sheet</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Use tags at the beginning of a paragraph/line to change parameters dynamically.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-mono">
+                <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded">
+                    <span class="text-indigo-600 dark:text-indigo-400 font-bold">[voice:code]</span>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">Switches the narrator voice.</p>
+                    <p class="text-xs text-gray-400 mt-1">Ex: [voice:af_sarah] Hello there.</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded">
+                    <span class="text-indigo-600 dark:text-indigo-400 font-bold">[speed:number]</span>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">Changes speech speed (0.5 - 2.0).</p>
+                    <p class="text-xs text-gray-400 mt-1">Ex: [speed:1.5] I am talking fast!</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded col-span-1 md:col-span-2">
+                    <span class="text-green-600 dark:text-green-400 font-bold">Dialogue Example:</span>
+                    <div class="mt-2 text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap pl-2 border-l-2 border-green-300">
+[voice:am_adam] Hey Sarah, how are you?
+[voice:af_sarah][speed:1.2] I'm great Adam! Just moving a bit fast today.
+[voice:am_adam] No worries.
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- History -->
+        <!-- HISTORY TABLE -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4">History</h2>
-            <table class="w-full text-left text-sm">
-                <thead>
-                    <tr class="border-b dark:border-gray-700 opacity-70">
-                        <th class="py-2">Time</th><th class="py-2">Snippet</th><th class="py-2 text-right">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template x-for="item in history" :key="item.filename">
-                        <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="py-2" x-text="item.timestamp"></td>
-                            <td class="py-2 opacity-80" x-text="item.snippet"></td>
-                            <td class="py-2 text-right">
-                                <button @click="audioUrl = '/static/audio/' + item.filename" class="text-blue-500 mr-2">Play</button>
-                            </td>
+            <h2 class="text-xl font-bold mb-4">Generation History</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead>
+                        <tr class="border-b dark:border-gray-700 text-gray-500">
+                            <th class="py-3 px-2">Time</th>
+                            <th class="py-3 px-2">Voice Config</th>
+                            <th class="py-3 px-2">Text Snippet</th>
+                            <th class="py-3 px-2 text-right">Action</th>
                         </tr>
-                    </template>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <template x-for="item in history" :key="item.filename">
+                            <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <td class="py-3 px-2 whitespace-nowrap text-xs text-gray-500" x-text="item.timestamp"></td>
+                                <td class="py-3 px-2 font-medium text-indigo-600 dark:text-indigo-400" x-text="item.voice"></td>
+                                <td class="py-3 px-2 text-gray-600 dark:text-gray-300 max-w-xs truncate" x-text="item.snippet"></td>
+                                <td class="py-3 px-2 text-right">
+                                    <button @click="playHistory(item.filename)" class="text-indigo-600 hover:underline font-bold">Play</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
         </div>
+
     </main>
 
-    <!-- Settings Modal -->
-    <div x-show="showSettings" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-96">
-            <h2 class="text-xl font-bold mb-4">Settings</h2>
+    <!-- SETTINGS MODAL -->
+    <div x-show="showSettings" x-cloak class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl w-96 transform transition-all scale-100">
+            <h2 class="text-xl font-bold mb-4">Configuration</h2>
             
-            <label class="block text-sm font-medium mb-1">Kokoro API URL</label>
-            <input type="text" x-model="apiUrl" class="w-full p-2 mb-1 border rounded dark:bg-gray-700 dark:border-gray-600" placeholder="http://192.168.1.10:50050">
-            <p class="text-xs text-gray-500 mb-4">Example: http://host.docker.internal:50050</p>
+            <label class="block text-sm font-bold mb-1">Kokoro API URL</label>
+            <input type="text" x-model="apiUrl" class="w-full p-3 rounded border dark:bg-gray-900 dark:border-gray-600 mb-2 text-sm font-mono" placeholder="http://host.docker.internal:50050">
             
-            <div class="flex justify-end space-x-2">
-                <button @click="showSettings = false" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded">Cancel</button>
-                <button @click="saveSettings" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
+            <div class="flex justify-end space-x-2 mt-6">
+                <button @click="showSettings = false" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
+                <button @click="saveSettings" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-lg">Save Changes</button>
             </div>
         </div>
     </div>
@@ -119,22 +193,25 @@
         function appData() {
             return {
                 textInput: '',
-                selectedVoice: 'Bella (American)',
+                selectedVoice: 'af_bella',
+                mixVoice: 'none',
+                speed: 1.0,
                 file: null,
+                fileName: '',
                 loading: false,
                 audioUrl: null,
                 errorMsg: null,
                 history: {{ history | tojson }},
                 isDark: false,
                 showSettings: false,
-                apiUrl: '', // Bound to input
+                apiUrl: '',
                 
                 init() {
-                    // Theme Load
+                    // Theme
                     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                         this.isDark = true;
                     }
-                    // API URL Load (Default if empty)
+                    // Load URL
                     this.apiUrl = localStorage.getItem('kokoro_api_url') || 'http://host.docker.internal:50050';
                 },
 
@@ -144,10 +221,19 @@
                 },
 
                 saveSettings() {
-                    // Remove trailing slash if present
                     let url = this.apiUrl.replace(/\/+$/, "");
                     localStorage.setItem('kokoro_api_url', url);
                     this.showSettings = false;
+                },
+
+                handleFile(e) {
+                    this.file = e.target.files[0];
+                    if(this.file) this.fileName = this.file.name;
+                },
+
+                clearFile() {
+                    this.file = null;
+                    this.fileName = '';
                 },
 
                 async generateAudio() {
@@ -157,11 +243,12 @@
                     this.errorMsg = null;
                     this.audioUrl = null;
 
-                    // Get latest URL from storage
                     const currentApiUrl = localStorage.getItem('kokoro_api_url') || this.apiUrl;
 
                     const formData = new FormData();
                     formData.append('voice_select', this.selectedVoice);
+                    formData.append('voice_mix', this.mixVoice);
+                    formData.append('speed', this.speed);
                     formData.append('api_url', currentApiUrl);
                     if (this.textInput) formData.append('text_input', this.textInput);
                     if (this.file) formData.append('file_upload', this.file);
@@ -173,15 +260,20 @@
                         if (data.success) {
                             this.audioUrl = data.audio_url;
                             this.history = data.history;
-                            this.file = null;
+                            this.clearFile();
                         } else {
                             this.errorMsg = data.error || 'Server Error';
                         }
                     } catch (e) {
-                        this.errorMsg = 'Failed to connect to Web Interface Server';
+                        this.errorMsg = 'Failed to reach Web Client Backend';
                     } finally {
                         this.loading = false;
                     }
+                },
+
+                playHistory(filename) {
+                    this.audioUrl = '/static/audio/' + filename;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }
         }

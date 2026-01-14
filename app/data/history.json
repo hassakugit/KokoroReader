@@ -1,0 +1,74 @@
+[
+    {
+        "filename": "speech_d735af85.wav",
+        "timestamp": "2026-01-14 12:30:49",
+        "snippet": "They're not bad though. Their intonation is a litt...",
+        "voice": "Nicole (American)"
+    },
+    {
+        "filename": "speech_fbd73cd8.wav",
+        "timestamp": "2026-01-14 12:30:27",
+        "snippet": "I think you can mix up the voices.\r\n",
+        "voice": "Bella (American)"
+    },
+    {
+        "filename": "speech_f05b8af3.wav",
+        "timestamp": "2026-01-14 12:30:13",
+        "snippet": "There's not enough voices though.\r\n",
+        "voice": "Lewis (British)"
+    },
+    {
+        "filename": "speech_fcdad879.wav",
+        "timestamp": "2026-01-14 12:29:56",
+        "snippet": "I want to be able to add markup so you can change ...",
+        "voice": "George (British)"
+    },
+    {
+        "filename": "speech_9f3dc925.wav",
+        "timestamp": "2026-01-14 12:29:26",
+        "snippet": "I just need to change how the web access works.",
+        "voice": "George (British)"
+    },
+    {
+        "filename": "speech_a46e72e5.wav",
+        "timestamp": "2026-01-14 12:29:06",
+        "snippet": "Oh, I got the voice generation thing going.",
+        "voice": "Sky (American)"
+    },
+    {
+        "filename": "speech_971e8e28.wav",
+        "timestamp": "2026-01-14 07:10:47",
+        "snippet": "I'm currently developing an addon for Anki (an ope...",
+        "voice": "Sky (American)"
+    },
+    {
+        "filename": "speech_c1122b79.wav",
+        "timestamp": "2026-01-14 07:10:24",
+        "snippet": "I'm currently developing an addon for Anki (an ope...",
+        "voice": "Lewis (British)"
+    },
+    {
+        "filename": "speech_e1022ada.wav",
+        "timestamp": "2026-01-14 07:10:06",
+        "snippet": "I'm currently developing an addon for Anki (an ope...",
+        "voice": "George (British)"
+    },
+    {
+        "filename": "speech_708f078f.wav",
+        "timestamp": "2026-01-14 07:09:29",
+        "snippet": "'m currently developing an addon for Anki (an open...",
+        "voice": "Emma (British)"
+    },
+    {
+        "filename": "speech_c611a57d.wav",
+        "timestamp": "2026-01-14 07:08:56",
+        "snippet": "'m currently developing an addon for Anki (an open...",
+        "voice": "Sarah (American)"
+    },
+    {
+        "filename": "speech_c89a0c62.wav",
+        "timestamp": "2026-01-14 07:07:29",
+        "snippet": "'m currently developing an addon for Anki (an open...",
+        "voice": "Bella (American)"
+    }
+]

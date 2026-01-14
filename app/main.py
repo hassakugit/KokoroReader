@@ -8,7 +8,8 @@ import uuid
 import pypdf
 from typing import Optional
 
-from app.audio_client import process_text_and_generate, VOICES
+from app.audio_client import process_text_and_generate
+from app.voice_data import get_formatted_voice_list
 from app.history import add_entry, load_history
 
 app = FastAPI()
@@ -20,7 +21,7 @@ templates = Jinja2Templates(directory="app/templates")
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {
         "request": request, 
-        "voices": VOICES,
+        "voices": get_formatted_voice_list(),
         "history": load_history()
     })
 
@@ -29,12 +30,14 @@ async def generate_tts(
     request: Request,
     text_input: Optional[str] = Form(None),
     voice_select: str = Form(...),
+    voice_mix: Optional[str] = Form(None),
+    speed: float = Form(1.0),
     api_url: str = Form(...),
     file_upload: Optional[UploadFile] = File(None)
 ):
     final_text = ""
     
-    # 1. Parse File or Text
+    # 1. Parse Input
     if file_upload and file_upload.filename:
         temp_filename = f"temp_{uuid.uuid4()}_{file_upload.filename}"
         with open(temp_filename, "wb") as buffer:
@@ -57,23 +60,31 @@ async def generate_tts(
     if not final_text.strip():
         return JSONResponse({"error": "No text provided"}, status_code=400)
 
-    # 2. Process via External API
+    # 2. Process
     try:
-        voice_id = VOICES.get(voice_select, voice_select)
-        
-        # This function calls the external API
-        audio_segment = process_text_and_generate(final_text, voice_id, api_url)
+        audio_segment = process_text_and_generate(
+            final_text, 
+            voice_select, 
+            speed, 
+            voice_mix, 
+            api_url
+        )
         
         if len(audio_segment) == 0:
-            return JSONResponse({"error": "No audio generated from API"}, status_code=500)
+            return JSONResponse({"error": "No audio generated"}, status_code=500)
 
-        # 3. Save result
+        # 3. Save
         filename = f"speech_{uuid.uuid4().hex[:8]}.wav"
         output_path = os.path.join("app/static/audio", filename)
         audio_segment.export(output_path, format="wav")
         
-        # 4. Update History
-        updated_history = add_entry(filename, final_text, voice_select)
+        # 4. History
+        # Format "Bella + Sarah" for display if mixed
+        display_voice = voice_select
+        if voice_mix and voice_mix != "none":
+            display_voice += f" + {voice_mix}"
+            
+        updated_history = add_entry(filename, final_text, display_voice)
         
         return JSONResponse({
             "success": True, 
@@ -82,5 +93,4 @@ async def generate_tts(
         })
         
     except Exception as e:
-        print(f"Error: {e}")
         return JSONResponse({"error": str(e)}, status_code=500)
