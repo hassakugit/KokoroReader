@@ -60,7 +60,7 @@ async def generate_tts(
     if not final_text.strip():
         return JSONResponse({"error": "No text provided"}, status_code=400)
 
-    # 2. Process
+    # 2. Process Audio
     try:
         audio_segment = process_text_and_generate(
             final_text, 
@@ -73,22 +73,31 @@ async def generate_tts(
         if len(audio_segment) == 0:
             return JSONResponse({"error": "No audio generated"}, status_code=500)
 
-        # 3. Save
-        filename = f"speech_{uuid.uuid4().hex[:8]}.wav"
-        output_path = os.path.join("app/static/audio", filename)
-        audio_segment.export(output_path, format="wav")
+        # 3. Save Output (WAV and MP3)
+        base_filename = f"speech_{uuid.uuid4().hex[:8]}"
         
-        # 4. History
-        # Format "Bella + Sarah" for display if mixed
+        # Save WAV
+        wav_filename = f"{base_filename}.wav"
+        wav_path = os.path.join("app/static/audio", wav_filename)
+        audio_segment.export(wav_path, format="wav")
+        
+        # Save MP3 (Bitrate 192k for good quality)
+        mp3_filename = f"{base_filename}.mp3"
+        mp3_path = os.path.join("app/static/audio", mp3_filename)
+        audio_segment.export(mp3_path, format="mp3", bitrate="192k")
+        
+        # 4. Update History
         display_voice = voice_select
         if voice_mix and voice_mix != "none":
             display_voice += f" + {voice_mix}"
             
-        updated_history = add_entry(filename, final_text, display_voice)
+        # We store the WAV filename as the key, frontend derives MP3 link
+        updated_history = add_entry(wav_filename, final_text, display_voice)
         
         return JSONResponse({
             "success": True, 
-            "audio_url": f"/static/audio/{filename}",
+            "audio_url": f"/static/audio/{wav_filename}",
+            "mp3_url": f"/static/audio/{mp3_filename}",
             "history": updated_history
         })
         

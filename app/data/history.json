@@ -1,74 +1,152 @@
 [
     {
-        "filename": "speech_d735af85.wav",
-        "timestamp": "2026-01-14 12:30:49",
-        "snippet": "They're not bad though. Their intonation is a litt...",
-        "voice": "Nicole (American)"
+        "filename": "speech_726590fb.wav",
+        "timestamp": "2026-01-29 05:45:32",
+        "snippet": "Cardboard box too small.\r\nCat enters anyway\u2014\r\nbox ...",
+        "voice": "af_bella"
     },
     {
-        "filename": "speech_fbd73cd8.wav",
-        "timestamp": "2026-01-14 12:30:27",
-        "snippet": "I think you can mix up the voices.\r\n",
-        "voice": "Bella (American)"
+        "filename": "speech_c73ddbf9.wav",
+        "timestamp": "2026-01-29 05:44:58",
+        "snippet": "\r\n\r\nSoft thunder rolls in\r\na cat flops onto the ru...",
+        "voice": "af_bella"
     },
     {
-        "filename": "speech_f05b8af3.wav",
-        "timestamp": "2026-01-14 12:30:13",
-        "snippet": "There's not enough voices though.\r\n",
-        "voice": "Lewis (British)"
+        "filename": "speech_b2a7d1d7.wav",
+        "timestamp": "2026-01-29 05:43:59",
+        "snippet": "Soft thunder rolls in\r\na cat flops onto the rug\u2014\r\n...",
+        "voice": "af_bella"
     },
     {
-        "filename": "speech_fcdad879.wav",
-        "timestamp": "2026-01-14 12:29:56",
-        "snippet": "I want to be able to add markup so you can change ...",
-        "voice": "George (British)"
+        "filename": "speech_2998a1b6.wav",
+        "timestamp": "2026-01-14 13:19:32",
+        "snippet": "\r\nwith some food his mother made for him. On the w...",
+        "voice": "am_eric"
     },
     {
-        "filename": "speech_9f3dc925.wav",
-        "timestamp": "2026-01-14 12:29:26",
-        "snippet": "I just need to change how the web access works.",
-        "voice": "George (British)"
+        "filename": "speech_a081b9a2.wav",
+        "timestamp": "2026-01-14 13:19:13",
+        "snippet": "\r\nwith some food his mother made for him. On the w...",
+        "voice": "am_eric"
     },
     {
-        "filename": "speech_a46e72e5.wav",
-        "timestamp": "2026-01-14 12:29:06",
-        "snippet": "Oh, I got the voice generation thing going.",
-        "voice": "Sky (American)"
+        "filename": "speech_fd07a701.wav",
+        "timestamp": "2026-01-14 13:18:55",
+        "snippet": "\r\nwith some food his mother made for him. On the w...",
+        "voice": "am_eric"
     },
     {
-        "filename": "speech_971e8e28.wav",
-        "timestamp": "2026-01-14 07:10:47",
-        "snippet": "I'm currently developing an addon for Anki (an ope...",
-        "voice": "Sky (American)"
+        "filename": "speech_fd0b36b0.wav",
+        "timestamp": "2026-01-14 13:18:31",
+        "snippet": "\r\nwith some food his mother made for him. On the w...",
+        "voice": "am_eric"
     },
     {
-        "filename": "speech_c1122b79.wav",
-        "timestamp": "2026-01-14 07:10:24",
-        "snippet": "I'm currently developing an addon for Anki (an ope...",
-        "voice": "Lewis (British)"
+        "filename": "speech_2c55b8b5.wav",
+        "timestamp": "2026-01-14 13:18:12",
+        "snippet": "\r\nwith some food his mother made for him. On the w...",
+        "voice": "af_sarah"
     },
     {
-        "filename": "speech_e1022ada.wav",
-        "timestamp": "2026-01-14 07:10:06",
-        "snippet": "I'm currently developing an addon for Anki (an ope...",
-        "voice": "George (British)"
+        "filename": "speech_f6da893e.wav",
+        "timestamp": "2026-01-14 13:17:30",
+        "snippet": "Peach Boy\r\nA long time ago in Japan, an old man an...",
+        "voice": "af_kore"
     },
     {
-        "filename": "speech_708f078f.wav",
-        "timestamp": "2026-01-14 07:09:29",
-        "snippet": "'m currently developing an addon for Anki (an open...",
-        "voice": "Emma (British)"
+        "filename": "speech_0344a72f.wav",
+        "timestamp": "2026-01-14 13:16:54",
+        "snippet": "Peach Boy...\r\n",
+        "voice": "af_kore"
     },
     {
-        "filename": "speech_c611a57d.wav",
-        "timestamp": "2026-01-14 07:08:56",
-        "snippet": "'m currently developing an addon for Anki (an open...",
-        "voice": "Sarah (American)"
+        "filename": "speech_e28b4865.wav",
+        "timestamp": "2026-01-14 13:13:46",
+        "snippet": " \n3 9  \n \n2 0 . T h e l a s t s t r a w t h a t b ...",
+        "voice": "jm_kumo + af_aoede"
     },
     {
-        "filename": "speech_c89a0c62.wav",
-        "timestamp": "2026-01-14 07:07:29",
-        "snippet": "'m currently developing an addon for Anki (an open...",
-        "voice": "Bella (American)"
+        "filename": "speech_3180c23f.wav",
+        "timestamp": "2026-01-14 13:09:08",
+        "snippet": "Pleuracy of the [Butt](-2),[hole](+2)",
+        "voice": "af_bella + af_aoede"
+    },
+    {
+        "filename": "speech_5423432b.wav",
+        "timestamp": "2026-01-14 13:08:26",
+        "snippet": "Pleuracy of the [Butt](-2),[hole](+2)",
+        "voice": "af_bella"
+    },
+    {
+        "filename": "speech_ccfc9d54.wav",
+        "timestamp": "2026-01-14 13:07:52",
+        "snippet": "Pleuracy of the [Butt](-2)[hole](+2)",
+        "voice": "af_bella"
+    },
+    {
+        "filename": "speech_2368a3c9.wav",
+        "timestamp": "2026-01-14 13:07:26",
+        "snippet": "Pleuracy of the [Butthole](-2)",
+        "voice": "af_bella"
+    },
+    {
+        "filename": "speech_fbc6e0ac.wav",
+        "timestamp": "2026-01-14 13:07:17",
+        "snippet": "Pleuracy of the [Butthole](+2)",
+        "voice": "af_bella"
+    },
+    {
+        "filename": "speech_62a7eab7.wav",
+        "timestamp": "2026-01-14 13:07:03",
+        "snippet": "Pleuracy of the [Butthole](+5)",
+        "voice": "af_bella"
+    },
+    {
+        "filename": "speech_ce743567.wav",
+        "timestamp": "2026-01-14 13:05:08",
+        "snippet": " pleurisy of the butthole.",
+        "voice": "af_river"
+    },
+    {
+        "filename": "speech_0eb3cabc.wav",
+        "timestamp": "2026-01-14 13:05:03",
+        "snippet": " pleurisy of the butthole.",
+        "voice": "af_kore"
+    },
+    {
+        "filename": "speech_83b04c49.wav",
+        "timestamp": "2026-01-14 13:04:59",
+        "snippet": " pleurisy of the butthole.",
+        "voice": "af_jessica"
+    },
+    {
+        "filename": "speech_ab2b9584.wav",
+        "timestamp": "2026-01-14 13:04:52",
+        "snippet": " pleurisy [+3] of the butthole.",
+        "voice": "am_santa"
+    },
+    {
+        "filename": "speech_16e329ed.wav",
+        "timestamp": "2026-01-14 13:04:31",
+        "snippet": "He was admitted overnight with what the chart rath...",
+        "voice": "am_santa"
+    },
+    {
+        "filename": "speech_1b4b9ea9.wav",
+        "timestamp": "2026-01-14 12:55:55",
+        "snippet": "He was admitted overnight with what the chart rath...",
+        "voice": "am_santa"
+    },
+    {
+        "filename": "speech_6e499ea2.wav",
+        "timestamp": "2026-01-14 12:54:15",
+        "snippet": "He was admitted overnight with what the chart rath...",
+        "voice": "am_santa"
+    },
+    {
+        "filename": "speech_64c0cb46.wav",
+        "timestamp": "2026-01-14 12:53:58",
+        "snippet": "He was admitted overnight with what the chart rath...",
+        "voice": "am_santa"
     }
 ]

@@ -3,170 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kokoro Web Client</title>
+    <title>Kokoro Studio</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script> tailwind.config = { darkMode: 'class' } </script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 850: '#151f32', 900: '#0f172a' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Alpine JS -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style> 
-        [x-cloak] { display: none !important; } 
-        select { -webkit-appearance: none; } /* Better looking selects */
+
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        
+        /* Range Slider Styling */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px; width: 16px;
+            border-radius: 50%;
+            background: #4f46e5;
+            margin-top: -6px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px;
+            background: #e2e8f0; border-radius: 2px;
+        }
+        .dark input[type=range]::-webkit-slider-runnable-track { background: #4b5563; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 transition-colors duration-300 dark:bg-gray-900 dark:text-gray-200 min-h-screen">
+<body class="bg-slate-50 text-slate-800 transition-colors duration-300 dark:bg-slate-900 dark:text-slate-200 min-h-screen pb-12">
 
-    <!-- Header -->
-    <header class="bg-white dark:bg-gray-800 shadow-md p-4 sticky top-0 z-10">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
-                Kokoro <span class="text-gray-500 font-light text-lg">Studio</span>
-            </h1>
-            <div class="flex items-center space-x-3">
-                <button @click="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span x-show="!isDark">🌞</span><span x-show="isDark" x-cloak>🌙</span>
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-20 bg-white/80 dark:bg-slate-850/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">K</div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-800 dark:text-white">
+                    Kokoro <span class="text-slate-400 font-medium">Studio</span>
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button @click="toggleTheme()" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                    <span x-show="!isDark">☀️</span><span x-show="isDark" x-cloak>🌙</span>
                 </button>
-                <button @click="showSettings = true" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                <button @click="showSettings = true" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                     ⚙️
                 </button>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <main class="max-w-6xl mx-auto p-4 space-y-6">
-        
-        <!-- MAIN INTERFACE -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-            <form @submit.prevent="generateAudio">
+    <main class="max-w-6xl mx-auto px-4 md:px-6 pt-8 space-y-8">
+
+        <!-- Main Workspace -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left: Inputs (Span 8) -->
+            <div class="lg:col-span-8 space-y-6">
                 
-                <!-- TOP CONTROLS GRID -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg border dark:border-gray-700">
-                    
-                    <!-- Primary Voice (Span 5) -->
-                    <div class="md:col-span-5">
-                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Primary Voice</label>
-                        <div class="relative">
-                            <select x-model="selectedVoice" class="w-full p-2.5 pl-3 pr-8 rounded border bg-white dark:bg-gray-700 dark:border-gray-600 focus:ring-2 ring-indigo-500 outline-none text-sm">
-                                {% for v in voices %}
-                                <option value="{{ v.id }}">{{ v.label }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">▼</div>
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                    <form @submit.prevent="generateAudio">
+                        
+                        <!-- Toolbar -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <!-- Voice Select -->
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Primary Voice</label>
+                                <div class="relative">
+                                    <select x-model="selectedVoice" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
+                                        {% for v in voices %}
+                                        <option value="{{ v.id }}">{{ v.label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">▼</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Mix Select -->
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Combine With (Mix)</label>
+                                <div class="relative">
+                                    <select x-model="mixVoice" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
+                                        <option value="none">-- None --</option>
+                                        {% for v in voices %}
+                                        <option value="{{ v.id }}">{{ v.label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">▼</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Editor -->
+                        <div class="relative mb-4 group">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Script / Markup</label>
+                                <div class="flex gap-2">
+                                    <label class="cursor-pointer text-xs flex items-center gap-1 bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 transition">
+                                        📄 Upload
+                                        <input type="file" @change="handleFile" class="hidden">
+                                    </label>
+                                    <button type="button" @click="textInput = ''" class="text-xs text-slate-400 hover:text-red-500 px-2 transition">Clear</button>
+                                </div>
+                            </div>
+
+                            <!-- File Notification -->
+                            <div x-show="fileName" x-transition class="absolute top-9 left-2 right-2 z-10 bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-2 rounded-md text-sm flex justify-between items-center shadow-sm">
+                                <span class="flex items-center gap-2">📎 <span x-text="fileName"></span></span>
+                                <button type="button" @click="clearFile" class="hover:bg-emerald-100 rounded-full p-1">✕</button>
+                            </div>
+
+                            <textarea x-model="textInput" 
+                                class="w-full h-64 p-4 font-mono text-sm leading-relaxed bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-shadow shadow-inner text-slate-700 dark:text-slate-300" 
+                                placeholder="Write your text here... Use markup like [voice:af_bella] to switch voices."></textarea>
+                        </div>
+
+                        <!-- Bottom Controls -->
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1">
+                                <label class="flex justify-between text-xs font-semibold uppercase text-slate-500 mb-1">
+                                    <span>Speed</span>
+                                    <span x-text="speed + 'x'"></span>
+                                </label>
+                                <input type="range" min="0.5" max="2.0" step="0.1" x-model="speed" class="w-full">
+                            </div>
+                            
+                            <button type="submit" :disabled="loading" class="flex-[2] py-3 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transform active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-wait flex justify-center items-center gap-2">
+                                <span x-show="loading" class="animate-spin text-xl">⟳</span>
+                                <span x-text="loading ? 'Rendering...' : 'Generate Audio'"></span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Error Alert -->
+                    <div x-show="errorMsg" x-cloak class="mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded-r-md">
+                        <strong class="block font-bold mb-1">Error</strong>
+                        <span x-text="errorMsg"></span>
+                    </div>
+                </div>
+
+                <!-- Current Result Player -->
+                <div x-show="audioUrl" x-transition class="bg-gradient-to-r from-indigo-600 to-purple-700 rounded-2xl p-6 text-white shadow-xl">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold">Generation Complete</h3>
+                            <p class="text-indigo-100 text-sm opacity-90">Ready for playback or download</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <a :href="audioUrl" download class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded text-xs font-medium backdrop-blur-sm transition">⬇ WAV</a>
+                            <a :href="mp3Url" download class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded text-xs font-medium backdrop-blur-sm transition">⬇ MP3</a>
                         </div>
                     </div>
+                    <audio :src="audioUrl" controls autoplay class="w-full h-10 opacity-90 hover:opacity-100 transition"></audio>
+                </div>
 
-                    <!-- Mixing Voice (Span 4) -->
-                    <div class="md:col-span-4">
-                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Mix With (Optional)</label>
-                        <div class="relative">
-                            <select x-model="mixVoice" class="w-full p-2.5 pl-3 pr-8 rounded border bg-white dark:bg-gray-700 dark:border-gray-600 focus:ring-2 ring-indigo-500 outline-none text-sm">
-                                <option value="none">-- No Mixing --</option>
-                                {% for v in voices %}
-                                <option value="{{ v.id }}">{{ v.label }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">▼</div>
+            </div>
+
+            <!-- Right: History & Tips (Span 4) -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- Tips Panel -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <div class="bg-slate-100 dark:bg-slate-700/50 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                            💡 Pro Tips
+                        </h3>
+                    </div>
+                    <div class="p-4 space-y-4 text-sm text-slate-600 dark:text-slate-400">
+                        
+                        <!-- Phonemes -->
+                        <div class="flex gap-3">
+                            <div class="shrink-0 text-indigo-500 text-lg">🗣️</div>
+                            <div>
+                                <p class="font-medium text-slate-800 dark:text-slate-200">Pronunciation</p>
+                                <p class="text-xs mt-0.5">Use slashes and markdown links:</p>
+                                <code class="block mt-1 bg-slate-100 dark:bg-slate-900 p-1.5 rounded text-xs font-mono select-all">[Kokoro](/kˈOkəɹO/)</code>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Speed (Span 3) -->
-                    <div class="md:col-span-3">
-                        <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Speed: <span x-text="speed + 'x'"></span></label>
-                        <input type="range" min="0.5" max="2.0" step="0.1" x-model="speed" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 accent-indigo-500 mt-2">
-                    </div>
-                </div>
+                        <!-- Intonation -->
+                        <div class="flex gap-3">
+                            <div class="shrink-0 text-indigo-500 text-lg">💬</div>
+                            <div>
+                                <p class="font-medium text-slate-800 dark:text-slate-200">Intonation & Punctuation</p>
+                                <p class="text-xs mt-0.5">Control flow with punctuation:</p>
+                                <code class="block mt-1 bg-slate-100 dark:bg-slate-900 p-1.5 rounded text-xs font-mono tracking-widest">; : , . ! ? — … " ( )</code>
+                            </div>
+                        </div>
 
-                <!-- FILE & TEXT INPUT -->
-                <div class="mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="block text-sm font-medium">Input Text / Script</label>
-                        <label class="cursor-pointer text-xs bg-indigo-50 text-indigo-600 px-3 py-1 rounded hover:bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-200 transition">
-                            📂 Upload PDF/TXT
-                            <input type="file" @change="handleFile" class="hidden">
-                        </label>
-                    </div>
-                    
-                    <div x-show="fileName" class="mb-2 p-2 bg-green-50 text-green-700 text-sm rounded flex justify-between items-center border border-green-200">
-                        <span>📄 <span x-text="fileName"></span></span>
-                        <button type="button" @click="clearFile" class="text-red-500 hover:text-red-700">✕</button>
-                    </div>
+                        <!-- Stress Down -->
+                        <div class="flex gap-3">
+                            <div class="shrink-0 text-indigo-500 text-lg">⬇️</div>
+                            <div>
+                                <p class="font-medium text-slate-800 dark:text-slate-200">Lower Stress</p>
+                                <p class="text-xs mt-0.5">Reduce emphasis on specific words:</p>
+                                <code class="inline-block mt-1 bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded text-xs font-mono select-all">[word](-1)</code> or 
+                                <code class="inline-block mt-1 bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded text-xs font-mono select-all">[word](-2)</code>
+                            </div>
+                        </div>
 
-                    <textarea x-model="textInput" rows="8" class="w-full p-4 font-mono text-sm rounded border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner" placeholder="Enter text here..."></textarea>
-                </div>
+                         <!-- Stress Up -->
+                         <div class="flex gap-3">
+                            <div class="shrink-0 text-indigo-500 text-lg">⬆️</div>
+                            <div>
+                                <p class="font-medium text-slate-800 dark:text-slate-200">Raise Stress</p>
+                                <p class="text-xs mt-0.5">Add emphasis (best on short words):</p>
+                                <code class="inline-block mt-1 bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded text-xs font-mono select-all">[word](+2)</code>
+                            </div>
+                        </div>
 
-                <!-- GENERATE BUTTON -->
-                <button type="submit" :disabled="loading" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-lg shadow-md hover:shadow-lg hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-[0.99] flex justify-center items-center text-lg">
-                    <span x-show="loading" class="animate-spin mr-3 text-2xl">⟳</span>
-                    <span x-text="loading ? 'Rendering Audio...' : 'Generate Speech'"></span>
-                </button>
-            </form>
+                        <div class="border-t dark:border-slate-700 pt-3 mt-2">
+                            <p class="font-medium text-xs mb-2">Switch Voice:</p>
+                            <code class="block bg-slate-100 dark:bg-slate-900 p-1.5 rounded text-xs font-mono select-all">[voice:af_bella]</code>
+                            <p class="font-medium text-xs mt-2 mb-1">Change Speed:</p>
+                            <code class="block bg-slate-100 dark:bg-slate-900 p-1.5 rounded text-xs font-mono select-all">[speed:1.2]</code>
+                        </div>
 
-            <!-- ERROR MSG -->
-            <div x-show="errorMsg" x-cloak class="mt-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
-                <p class="font-bold">Error</p>
-                <p x-text="errorMsg"></p>
-            </div>
-
-            <!-- AUDIO PLAYER -->
-            <div x-show="audioUrl" x-transition class="mt-8 p-6 bg-indigo-50 dark:bg-gray-700/50 rounded-xl border border-indigo-100 dark:border-gray-600">
-                <h3 class="text-lg font-semibold mb-3 flex items-center">
-                    🎵 Result 
-                    <a :href="audioUrl" download class="ml-auto text-sm bg-white dark:bg-gray-600 px-3 py-1 rounded shadow hover:bg-gray-50 dark:hover:bg-gray-500 transition">Download WAV</a>
-                </h3>
-                <audio :src="audioUrl" controls autoplay class="w-full h-10"></audio>
-            </div>
-        </div>
-        
-        <!-- MARKUP LEGEND -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border-l-4 border-blue-400">
-            <h3 class="text-lg font-bold mb-3 text-gray-700 dark:text-gray-200">Markup Cheat Sheet</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Use tags at the beginning of a paragraph/line to change parameters dynamically.
-            </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-mono">
-                <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded">
-                    <span class="text-indigo-600 dark:text-indigo-400 font-bold">[voice:code]</span>
-                    <p class="text-gray-600 dark:text-gray-400 mt-1">Switches the narrator voice.</p>
-                    <p class="text-xs text-gray-400 mt-1">Ex: [voice:af_sarah] Hello there.</p>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded">
-                    <span class="text-indigo-600 dark:text-indigo-400 font-bold">[speed:number]</span>
-                    <p class="text-gray-600 dark:text-gray-400 mt-1">Changes speech speed (0.5 - 2.0).</p>
-                    <p class="text-xs text-gray-400 mt-1">Ex: [speed:1.5] I am talking fast!</p>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded col-span-1 md:col-span-2">
-                    <span class="text-green-600 dark:text-green-400 font-bold">Dialogue Example:</span>
-                    <div class="mt-2 text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap pl-2 border-l-2 border-green-300">
-[voice:am_adam] Hey Sarah, how are you?
-[voice:af_sarah][speed:1.2] I'm great Adam! Just moving a bit fast today.
-[voice:am_adam] No worries.
                     </div>
                 </div>
+
             </div>
         </div>
 
-        <!-- HISTORY TABLE -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4">Generation History</h2>
+        <!-- History Section -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+            <h2 class="text-xl font-bold mb-4 text-slate-800 dark:text-white flex items-center gap-2">
+                ⏳ Recent Generations
+            </h2>
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm border-collapse">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b dark:border-gray-700 text-gray-500">
+                        <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-bold uppercase text-slate-500 tracking-wider">
                             <th class="py-3 px-2">Time</th>
-                            <th class="py-3 px-2">Voice Config</th>
-                            <th class="py-3 px-2">Text Snippet</th>
-                            <th class="py-3 px-2 text-right">Action</th>
+                            <th class="py-3 px-2">Voice Configuration</th>
+                            <th class="py-3 px-2 w-1/3">Snippet</th>
+                            <th class="py-3 px-2 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="text-sm divide-y divide-slate-100 dark:divide-slate-700/50">
                         <template x-for="item in history" :key="item.filename">
-                            <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                <td class="py-3 px-2 whitespace-nowrap text-xs text-gray-500" x-text="item.timestamp"></td>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group">
+                                <td class="py-3 px-2 whitespace-nowrap text-slate-500 text-xs" x-text="item.timestamp"></td>
                                 <td class="py-3 px-2 font-medium text-indigo-600 dark:text-indigo-400" x-text="item.voice"></td>
-                                <td class="py-3 px-2 text-gray-600 dark:text-gray-300 max-w-xs truncate" x-text="item.snippet"></td>
-                                <td class="py-3 px-2 text-right">
-                                    <button @click="playHistory(item.filename)" class="text-indigo-600 hover:underline font-bold">Play</button>
+                                <td class="py-3 px-2 text-slate-600 dark:text-slate-400 max-w-xs truncate" x-text="item.snippet"></td>
+                                <td class="py-3 px-2 text-right flex justify-end items-center gap-2">
+                                    <button @click="playHistory(item.filename)" class="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition" title="Play">
+                                        ▶️
+                                    </button>
+                                    <div class="h-4 w-px bg-slate-300 dark:bg-slate-600 mx-1"></div>
+                                    <a :href="'/static/audio/' + item.filename" download class="text-xs font-bold text-slate-500 hover:text-indigo-600 transition" title="Download WAV">WAV</a>
+                                    <a :href="'/static/audio/' + item.filename.replace('.wav', '.mp3')" download class="text-xs font-bold text-slate-500 hover:text-indigo-600 transition" title="Download MP3">MP3</a>
                                 </td>
                             </tr>
                         </template>
+                        <tr x-show="history.length === 0">
+                            <td colspan="4" class="py-8 text-center text-slate-400 italic">No history yet. Generate something!</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -174,17 +289,24 @@
 
     </main>
 
-    <!-- SETTINGS MODAL -->
-    <div x-show="showSettings" x-cloak class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl w-96 transform transition-all scale-100">
-            <h2 class="text-xl font-bold mb-4">Configuration</h2>
+    <!-- Settings Modal -->
+    <div x-show="showSettings" x-cloak class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-700 transform transition-all">
+            <h2 class="text-xl font-bold mb-6 text-slate-800 dark:text-white">Settings</h2>
             
-            <label class="block text-sm font-bold mb-1">Kokoro API URL</label>
-            <input type="text" x-model="apiUrl" class="w-full p-3 rounded border dark:bg-gray-900 dark:border-gray-600 mb-2 text-sm font-mono" placeholder="http://host.docker.internal:50050">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Kokoro API Endpoint</label>
+                    <input type="text" x-model="apiUrl" class="w-full p-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" placeholder="http://host.docker.internal:50050">
+                    <p class="text-xs text-slate-500 mt-2">
+                        For Docker on Mac/Windows, use <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">http://host.docker.internal:50050</code>
+                    </p>
+                </div>
+            </div>
             
-            <div class="flex justify-end space-x-2 mt-6">
-                <button @click="showSettings = false" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
-                <button @click="saveSettings" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-lg">Save Changes</button>
+            <div class="flex justify-end gap-3 mt-8">
+                <button @click="showSettings = false" class="px-5 py-2.5 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700 rounded-lg font-medium transition">Cancel</button>
+                <button @click="saveSettings" class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium shadow-md transition">Save Settings</button>
             </div>
         </div>
     </div>
@@ -200,6 +322,7 @@
                 fileName: '',
                 loading: false,
                 audioUrl: null,
+                mp3Url: null, // New MP3 property
                 errorMsg: null,
                 history: {{ history | tojson }},
                 isDark: false,
@@ -207,11 +330,9 @@
                 apiUrl: '',
                 
                 init() {
-                    // Theme
                     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                         this.isDark = true;
                     }
-                    // Load URL
                     this.apiUrl = localStorage.getItem('kokoro_api_url') || 'http://host.docker.internal:50050';
                 },
 
@@ -242,9 +363,9 @@
                     this.loading = true;
                     this.errorMsg = null;
                     this.audioUrl = null;
+                    this.mp3Url = null;
 
                     const currentApiUrl = localStorage.getItem('kokoro_api_url') || this.apiUrl;
-
                     const formData = new FormData();
                     formData.append('voice_select', this.selectedVoice);
                     formData.append('voice_mix', this.mixVoice);
@@ -259,13 +380,18 @@
                         
                         if (data.success) {
                             this.audioUrl = data.audio_url;
+                            this.mp3Url = data.mp3_url; // Set MP3 URL
                             this.history = data.history;
                             this.clearFile();
+                            // Auto scroll to player
+                            this.$nextTick(() => {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            });
                         } else {
                             this.errorMsg = data.error || 'Server Error';
                         }
                     } catch (e) {
-                        this.errorMsg = 'Failed to reach Web Client Backend';
+                        this.errorMsg = 'Failed to reach backend';
                     } finally {
                         this.loading = false;
                     }
@@ -273,6 +399,7 @@
 
                 playHistory(filename) {
                     this.audioUrl = '/static/audio/' + filename;
+                    this.mp3Url = '/static/audio/' + filename.replace('.wav', '.mp3');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }
